@@ -2,11 +2,15 @@
   "name": "DIGI Gaming — Egypt's Glow",
   "short_name": "DIGI Slot",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0b0f1e",
   "theme_color": "#e8b544",
   "orientation": "portrait",
+  "lang": "en",
+  "dir": "ltr",
   "description": "An immersive 5x5 Cascading Reel Slot Game with expanding wilds and free spins.",
+  "categories": ["games", "arcade"],
   "icons": [
     {
       "src": "icon-192.png",
