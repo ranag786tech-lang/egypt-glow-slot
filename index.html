@@ -1172,23 +1172,12 @@ window.addEventListener('load', ()=>{
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./pwabuilder-sw.js')
-        .then((registration) => {
-          console.log('ServiceWorker registered with scope: ', registration.scope);
-        })
-        .catch((error) => {
-          console.log('ServiceWorker registration failed: ', error);
-        });
+      navigator.serviceWorker.register('/sw.js')
+        .then((reg) => console.log('Service Worker registered!', reg))
+        .catch((err) => console.log('Service Worker registration failed:', err));
     });
   }
 </script>
-</body>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((reg) => console.log('Service Worker registered!', reg))
-      .catch((err) => console.log('Service Worker registration failed:', err));
-  });
-}
 
+</body>
 </html>
