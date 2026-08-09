@@ -23,7 +23,7 @@
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none;}
   html,body{margin:0; padding:0; height:100%; overflow:hidden; background:var(--night); font-family:'Trebuchet MS', Verdana, sans-serif;}
   
-  /* --- BRAND SPLASH (DIGI / DIGITALDAIRY786) --- */
+  /* --- BRAND SPLASH --- */
   #brand-splash {
     position: fixed; inset: 0; z-index: 300;
     background: radial-gradient(circle at center, #0a182e 0%, #02060d 100%);
@@ -346,15 +346,6 @@
 <canvas id="coin-fx-canvas"></canvas>
 
 <script>
-// SERVICE WORKER REGISTRATION (PWA)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('PWA Service Worker Registered Successfully!'))
-      .catch(err => console.log('Service Worker Registration Failed:', err));
-  });
-}
-
 (function(){
 "use strict";
 
@@ -1131,7 +1122,6 @@ $('play-game-btn').addEventListener('click', ()=>{
   sound.startMusic();
   $('main-menu').classList.add('hidden');
   
-  // Open Temple Doors Transition
   const doors = $('door-container');
   doors.classList.add('open');
   setTimeout(() => doors.remove(), 1300);
@@ -1163,7 +1153,6 @@ $('sound-toggle').addEventListener('click', ()=>{
 });
 
 window.addEventListener('load', ()=>{
-  // DIGI Splash Screen Timer (2.5s)
   setTimeout(() => {
     const splash = $('brand-splash');
     splash.classList.add('hidden');
@@ -1179,8 +1168,8 @@ window.addEventListener('load', ()=>{
 
 })();
 </script>
-</body>
-  <script>
+
+<script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./pwabuilder-sw.js')
@@ -1192,5 +1181,6 @@ window.addEventListener('load', ()=>{
         });
     });
   }
-  </script>
+</script>
+</body>
 </html>
