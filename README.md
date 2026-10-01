@@ -1,58 +1,102 @@
-# egypt-glow-slot
-Ancient Egypt Cascading Slot Game PWA.
-# 𓂀 DIGI Gaming — Egypt's Glow Slot PWA 𓅃
+# 𓂀 Egypt Glow Premium Slot — Mobile-First Casino Experience 𓅃
 
-An immersive, high-performance **5x5 Cascading Reel Slot Game** built with modern web technologies (**PixiJS**, **GSAP**, and **Web Audio API**). Inspired by top-tier casino slots, **Egypt's Glow** brings dynamic multipliers, wild expansions, custom particle celebrations, and full Progressive Web App (PWA) support.
-
-> **Branding:** Presented by **DIGI / Digitaldairy786**
+A modern, high-performance, mobile-first **5x5 Cascading Slot Machine** built with modern web standards (**PixiJS v7**, **GSAP 3**, and **Web Audio API**). **Egypt Glow** features dynamic expanding wilds, multi-tier win celebrations, daily quests, XP progression, scarab chest pick bonus games, procedural Web Audio sound design, and full offline PWA capabilities.
 
 ---
 
-## ✨ Features & Game Mechanics
+## ✨ Primary Features & Enhancements
 
-- 🎰 **5x5 Cascading Grid Engine:** Winning combinations explode and disappear, allowing new symbols to drop from above for infinite potential cascades in a single spin.
-- ⚡ **Turbo Mode:** Toggle ultra-fast spin dynamics and symbol drop durations ($0.12\text{s}$ per reel drop).
-- 🔄 **Auto-Spin Support:** Automated uninterrupted game loop for continuous play.
-- ☀️ **Expanding Solar Orb Wilds:** Landing a Wild symbol triggers a full-column golden solar beam expansion across all 5 rows.
-- 𓇳 **Free Spins Round:** Landing 3 or more Pyramid Scatters unlocks 8 Free Spins with accumulated multiplier bonuses.
-- 🪙 **2D Canvas Physics Engine:** Real-time tumbling gold coin particle rain effect on Big Wins ($10\times+$) and Free Spins completion.
-- 𓃥 **Egyptian Temple Intro:** High-tech **DIGI** splash screen paired with animated sliding temple doors transition.
-- 🔊 **Synthesized Audio Engine:** Built-in Web Audio API sound generator providing dynamic ambient background motifs, spin loops, win chimes, and fanfare without external MP3 dependencies.
+### 🎨 Theme & Visual Presentation
+- **Dynamic Ancient Egypt Canvas Atmosphere:** Animated pyramids, dynamic sky color transitions, ambient floating dust particle effects, golden glow highlights, and glowing temple borders.
+- **Modern Reel Presentation:** High-definition symbol textures rendered in PixiJS, smooth reel acceleration, motion blur during drops, anticipation animations on scatter landings, bounce drops, and symbol win highlights.
+- **Universal Emoji Symbol Graphics:** Crisp, high-definition icons (`👑`, `👸`, `🪲`, `🦅`, `🐕`, `🐱`, `☥`, `💎`, `☀️`, `🏛️`, `❓`) ensuring full compatibility across all mobile and desktop operating systems.
+
+### 💰 Win Celebration System
+- **6 Tiered Win Animations:**
+  - **Small Win:** Gentle panel glow & subtle audio chime.
+  - **Medium Win:** Coin burst effect & gold screen highlight.
+  - **Big Win (10x+):** Canvas particle coin rain & dynamic count-up tally.
+  - **Mega Win (25x+):** Fullscreen animated particle celebration & continuous coin physics.
+  - **Epic Win (50x+):** Cinematic screen shake, golden radial glare, and fanfare music.
+  - **Legendary Win (100x+):** Fullscreen golden explosion with intense particle physics.
+
+### 𓃻 Bonus Features & Mini-Games
+- **Free Spins Round:** Triggered by 3+ Pyramid Scatters, giving 8 Free Spins with accumulating multiplier bonuses.
+- **Expanding Solar Wilds:** Landing a Wild symbol triggers a full-column golden solar beam expansion across all 5 rows.
+- **Scarab Chest Pick Bonus:** Triggered by 3+ Chest/Scarab symbols, presenting an interactive pick-a-chest mini-game with instant cash multiplier awards.
+- **Mystery Symbol Transformation:** Mystery symbols (`❓`) land on the grid and simultaneously transform into high-paying matching symbols.
+- **Ra's Blessing Random Event:** Random chance on non-winning spins for Ra to bestow random Wilds onto the reels.
+
+### 🎵 Procedural Sound System
+- Built-in **Web Audio API Engine** generating dynamic sound synthesis without relying on external MP3 assets:
+  - Ambient Egyptian background motifs
+  - Reel spin loops & distinct stop thuds
+  - Multi-tier win fanfares
+  - Bonus trigger stings & chest selection clicks
+  - Mobile audio auto-unlock on first user tap
+
+### 🎮 Player Engagement & Economy
+- **XP & Level Progression:** Earn player XP with every spin, leveling up to unlock coin rewards.
+- **Daily Quests & Missions:** 3 rotating daily missions with progress bars and bonus coin payout claims.
+- **Achievements & Badges:** Track milestones (First Spin, Spin Centurion, High Roller, Lucky Scarab, Free Spins Master).
+- **Daily Login Streaks:** Claim escalating daily rewards for consecutive logins.
+- **Persistent LocalStorage:** Automatic persistence for player balance, XP, level, quests, achievements, and stats.
+
+### 📊 Game Lobby & Analytics System
+- **Interactive Game Lobby:** Integrated modal for player profiles, daily quests, achievements, rules paytable, statistics, and game settings.
+- **Game Analytics Engine:** Real-time tracking of session duration, total spins, RTP %, net win/loss, average bet, and bonus trigger frequency. Ready for Firebase/BigQuery integration.
 
 ---
 
-## 🛠️ Tech Stack & Dependencies
+## 🏗️ Architecture & Project Structure
 
-- **HTML5 / CSS3:** Custom responsive layout, CSS grid dynamics, and glowing Egyptian UI elements.
-- **JavaScript (ES6+):** Pure object-oriented game logic and state management.
-- **[PixiJS v7](https://pixijs.com/):** WebGL/Canvas high-performance 2D renderer for grid symbols and animations.
-- **[GSAP 3](https://greensock.com/gsap/):** Smooth easing animations for reel drops, symbol scaling, and screen shakes.
+```text
+├── css/
+│   └── style.css          # Modern Egyptian gold UI styling, responsive layout, modal overlays
+├── js/
+│   ├── analytics.js        # Analytics tracking and event dispatcher
+│   ├── app.js              # Application lifecycle, spin engine flow, and event bindings
+│   ├── audio.js            # Web Audio API sound synthesizer
+│   ├── bonusEngine.js      # Pick Bonus, Mystery Symbol, and Ra's Blessing random events
+│   ├── engagement.js       # XP, Levels, Quests, Achievements, Daily Login Streaks
+│   ├── pixiRenderer.js     # PixiJS WebGL 2D symbol grid rendering & particle effects
+│   ├── slotMath.js         # 5x5 Grid engine, 25-way paytable, weighted symbol RNG
+│   └── ui.js               # Multi-tier win celebrations, count-ups, coin physics, HUD management
+├── index.html              # HTML5 structure with PWA metadata and container layouts
+├── manifest.json           # Progressive Web App manifest
+├── sw.js                   # Service Worker for offline PWA asset caching
+└── README.md               # Project documentation
+```
+
+---
+
+## 🛠️ Technology Stack
+
+- **HTML5 & Modern CSS3:** Custom grid layout, gold gradient borders, glowing micro-interactions.
+- **JavaScript (ES6+ Modules):** Modular object-oriented architecture.
+- **[PixiJS v7](https://pixijs.com/):** WebGL/Canvas rendering engine for grid symbols, wild columns, and motion blur.
+- **[GSAP 3](https://greensock.com/gsap/):** Smooth easing transitions, reel acceleration, and modal animations.
 - **Web Audio API:** Real-time procedural audio synthesis.
 
 ---
 
 ## 📱 PWA & Offline Installation
 
-This game is fully configured as a **Progressive Web App (PWA)**. 
+This app is configured as a **Progressive Web App (PWA)**:
 
-### Key Manifest Configuration:
-- **Display:** `standalone` (Fullscreen, native-app feel with no browser bars).
-- **Orientation:** `portrait`
-- **Service Worker (`sw.js`):** Caches core assets locally for instant offline loading upon subsequent visits.
-
-### How to Install on Mobile:
-1. Open the hosted GitHub Pages link in **Google Chrome** (Android) or **Safari** (iOS).
-2. Tap the browser menu (**⋮** / Share button).
+1. Open the game in Chrome (Android) or Safari (iOS).
+2. Tap the browser menu (**⋮** or Share button).
 3. Select **"Add to Home Screen"** or **"Install App"**.
 
 ---
 
-## 📁 Repository Structure
+## 🚀 Performance & UX Improvements
 
-```text
-├── index.html        # Main application file (HTML5 + CSS + Game Logic)
-├── manifest.json     # PWA Web App Manifest settings
-├── sw.js             # Service Worker for offline asset caching
-├── icon-192.png      # Mobile App Icon (192x192 px)
-├── icon-512.png      # High-Res App Icon / Splash Image (512x512 px)
-└── README.md         # Documentation
+| Metric / Feature | Previous Version | Premium Upgrade |
+| :--- | :--- | :--- |
+| **FPS Target** | ~30-45 FPS | Locked **60 FPS** WebGL / Canvas |
+| **Codebase Structure** | Single monolithic `index.html` | Modular ES6 files (`css/`, `js/`) |
+| **Bonus Features** | Basic Scatters & Free Spins | Pick Bonus, Mystery Symbols, Ra's Blessing |
+| **Win Celebrations** | Basic text alert | 6 Tiered Celebrations + Canvas Physics Coin Rain |
+| **Sound Design** | None / Static HTML5 audio | Web Audio procedural synthesis |
+| **Retention Engine** | None | XP Levels, Daily Quests, Achievements, Login Streaks |
