@@ -79,6 +79,24 @@ class SlotEngine {
     this.totalSpins = 0;
     this.totalWagered = 0;
     this.totalPaid = 0;
+    this.targetRTP = 96.5;
+    this.featureFlags = {
+      freeSpins: true,
+      expandingWilds: true,
+      pickBonus: true,
+      mysterySymbols: true,
+      rasBlessing: true
+    };
+  }
+
+  setRTP(targetRTP) {
+    this.targetRTP = targetRTP;
+  }
+
+  setFeatureFlags(flags) {
+    if (flags) {
+      this.featureFlags = { ...this.featureFlags, ...flags };
+    }
   }
 
   _emptyGrid() {

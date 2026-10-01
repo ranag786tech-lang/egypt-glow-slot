@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Egypt's Glow — DIGI Premium Edition</title>
+<title>Egypt's Glow — DIGI Platform Edition</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#e8b544">
@@ -19,7 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.2/pixi.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 </head>
-<body>
+<body data-theme="egypt_gold">
 
 <!-- BRAND SPLASH -->
 <div id="brand-splash">
@@ -48,41 +48,147 @@
     </div>
   </div>
 
-  <!-- LOBBY / MAIN MENU -->
+  <!-- LOBBY / MAIN MENU (JILI-STYLE PREMIUM CASINO) -->
   <div id="main-menu">
-    <div class="menu-deity">𓅃</div>
-    <div>
-      <div class="menu-title">EGYPT'S GLOW</div>
-      <div class="menu-subtitle">PREMIUM CASCADING WAYS · EXPANDING WILDS</div>
+    <!-- LOBBY HEADER PROFILE -->
+    <div class="lobby-profile-bar">
+      <div class="profile-left">
+        <div class="avatar-box">👑</div>
+        <div class="profile-meta">
+          <div class="player-name">VIP PLAYER</div>
+          <div class="vip-badge-tag"><span id="lobby-vip-tier">OBSIDIAN RA</span> · LVL <span id="lobby-lvl">24</span></div>
+        </div>
+      </div>
+      <div class="profile-right">
+        <div class="coin-balance-tag">
+          <span class="coin-icon">💰</span>
+          <span id="lobby-balance-display">$12,450.00</span>
+        </div>
+      </div>
     </div>
 
-    <div class="lobby-stats-strip">
-      <div class="lobby-stat-item">RTP: 96.5%</div>
-      <div class="lobby-stat-item">Ways: 3,125</div>
-      <div class="lobby-stat-item">Max Win: 10,000x</div>
+    <!-- LIVE JACKPOT TICKER -->
+    <div class="jili-jackpot-banner">
+      <div class="jp-box grand"><span class="jp-lbl">GRAND</span><span class="jp-val" id="jp-grand">$250,840.00</span></div>
+      <div class="jp-box major"><span class="jp-lbl">MAJOR</span><span class="jp-val" id="jp-major">$42,150.00</span></div>
+      <div class="jp-box minor"><span class="jp-lbl">MINOR</span><span class="jp-val" id="jp-minor">$5,820.00</span></div>
     </div>
 
-    <div class="lobby-btn-grid">
-      <button class="lobby-btn" id="achievements-btn">🏆 Achievements</button>
-      <button class="lobby-btn" id="missions-btn">🎯 Daily Quests</button>
+    <!-- GAME SELECTION GRID -->
+    <div class="game-grid-section">
+      <div class="section-title">🔥 POPULAR CASINO SLOTS</div>
+      <div class="game-cards-container">
+
+        <!-- EGYPT GLOW (PRIMARY) -->
+        <div class="game-card primary-card" id="play-game-btn">
+          <div class="card-badge hot">HOT ⚡</div>
+          <div class="card-bg-glow"></div>
+          <div class="card-icon">👑</div>
+          <div class="card-info">
+            <div class="card-title">EGYPT'S GLOW</div>
+            <div class="card-tag">3,125 WAYS · RTP 96.5%</div>
+          </div>
+          <button class="card-play-btn">PLAY NOW</button>
+        </div>
+
+        <!-- RA'S WEALTH -->
+        <div class="game-card" id="card-ras-wealth">
+          <div class="card-badge new">NEW ✨</div>
+          <div class="card-icon">☀️</div>
+          <div class="card-info">
+            <div class="card-title">RA'S WEALTH</div>
+            <div class="card-tag">HOLD & WIN · 10,000X</div>
+          </div>
+          <button class="card-play-btn">PLAY</button>
+        </div>
+
+        <!-- ANUBIS GOLD -->
+        <div class="game-card" id="card-anubis-gold">
+          <div class="card-badge vip">VIP 🏆</div>
+          <div class="card-icon">🐕</div>
+          <div class="card-info">
+            <div class="card-title">ANUBIS GOLD</div>
+            <div class="card-tag">EXPANDING WILDS</div>
+          </div>
+          <button class="card-play-btn">PLAY</button>
+        </div>
+
+        <!-- PHARAOH'S SECRET -->
+        <div class="game-card" id="card-pharaoh-secret">
+          <div class="card-icon">🏛️</div>
+          <div class="card-info">
+            <div class="card-title">PHARAOH'S SECRET</div>
+            <div class="card-tag">MEGAWAYS 117,649</div>
+          </div>
+          <button class="card-play-btn">PLAY</button>
+        </div>
+
+      </div>
     </div>
 
-    <button id="play-game-btn">PLAY GAME</button>
+    <!-- LOBBY NAV CONTROL BAR -->
+    <div class="lobby-nav-grid">
+      <button class="lobby-nav-item" id="achievements-btn">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-lbl">Achievements</span>
+      </button>
+      <button class="lobby-nav-item" id="missions-btn">
+        <span class="nav-icon">🎯</span>
+        <span class="nav-lbl">Daily Quests</span>
+      </button>
+      <button class="lobby-nav-item" id="platform-wallet-btn">
+        <span class="nav-icon">💳</span>
+        <span class="nav-lbl">Wallet</span>
+      </button>
+      <button class="lobby-nav-item" id="platform-rewards-btn">
+        <span class="nav-icon">🎡</span>
+        <span class="nav-lbl">Wheel of Ra</span>
+      </button>
+      <button class="lobby-nav-item" id="platform-promos-btn">
+        <span class="nav-icon">🎟️</span>
+        <span class="nav-lbl">Promos</span>
+      </button>
+      <button class="lobby-nav-item" id="platform-events-btn">
+        <span class="nav-icon">⚔️</span>
+        <span class="nav-lbl">Events</span>
+      </button>
+      <button class="lobby-nav-item" id="platform-admin-btn">
+        <span class="nav-icon">🛡️</span>
+        <span class="nav-lbl">Admin</span>
+      </button>
+      <button class="lobby-nav-item" id="platform-analytics-btn">
+        <span class="nav-icon">📊</span>
+        <span class="nav-lbl">Analytics</span>
+      </button>
+    </div>
   </div>
 
   <!-- TOP HUD BAR -->
   <div id="top-bar">
     <div class="player-level-badge">
-      <span class="level-num">LVL <span id="player-level-val">1</span></span>
+      <span class="level-num"><span id="vip-badge-icon">🌱</span> LVL <span id="player-level-val">1</span></span>
       <div class="xp-bar-outer"><div class="xp-bar-inner" id="xp-bar-fill"></div></div>
     </div>
 
     <div id="title-wrap">
       <div id="title">EGYPT'S GLOW</div>
-      <div id="subtitle">DIGI GAMING EDITION</div>
+      <div id="subtitle">SLOT PLATFORM EDITION</div>
     </div>
 
     <div class="header-actions">
+      <select id="lang-select" style="background:rgba(0,0,0,0.6); color:var(--gold-bright); border:1px solid var(--gold); border-radius:12px; padding:2px 4px; font-size:11px;">
+        <option value="en">🇺🇸 EN</option>
+        <option value="es">🇪🇸 ES</option>
+        <option value="de">🇩🇪 DE</option>
+        <option value="ja">🇯🇵 JA</option>
+        <option value="ar">🇪🇬 AR</option>
+      </select>
+      <select id="theme-select" style="background:rgba(0,0,0,0.6); color:var(--gold-bright); border:1px solid var(--gold); border-radius:12px; padding:2px 4px; font-size:11px;">
+        <option value="egypt_gold">👑 Gold</option>
+        <option value="ruby_red">💎 Ruby</option>
+        <option value="nile_emerald">🌿 Emerald</option>
+        <option value="obsidian_dark">🌑 Obsidian</option>
+      </select>
       <button class="hud-btn small" id="sound-toggle">🔊</button>
     </div>
   </div>
@@ -106,14 +212,14 @@
   <div id="bottom-hud">
     <div class="hud-group">
       <div class="stat-box">
-        <div class="stat-label">Balance</div>
+        <div class="stat-label" data-i18n="balance">Balance</div>
         <div class="stat-value" id="balance-val">1000.00</div>
       </div>
     </div>
     <div class="hud-group">
       <button class="hud-btn small" id="bet-minus">−</button>
       <div class="stat-box">
-        <div class="stat-label">Bet</div>
+        <div class="stat-label" data-i18n="bet">Bet</div>
         <div class="stat-value" id="bet-val">1.00</div>
       </div>
       <button class="hud-btn small" id="bet-plus">+</button>
@@ -126,7 +232,7 @@
     </div>
     <div class="hud-group">
       <div class="stat-box">
-        <div class="stat-label">Total Win</div>
+        <div class="stat-label" data-i18n="win">Total Win</div>
         <div class="stat-value" id="total-win-val">0.00</div>
       </div>
     </div>
@@ -201,6 +307,85 @@
   </div>
 </div>
 
+<!-- PLATFORM WALLET MODAL -->
+<div class="modal-overlay hidden" id="wallet-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>💳 Player Wallet Ledger</h2>
+      <button class="modal-close" id="closeWalletModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; justify-content:space-around; background:rgba(0,0,0,0.4); padding:10px; border-radius:10px; margin-bottom:12px;">
+        <div>
+          <div style="font-size:11px; opacity:0.8;">Gold Coins (GC)</div>
+          <div style="font-weight:900; color:var(--gold-bright); font-size:16px;" id="wallet-gc-val">10,000</div>
+        </div>
+        <div>
+          <div style="font-size:11px; opacity:0.8;">Sweeps Coins (SC)</div>
+          <div style="font-weight:900; color:#00f2fe; font-size:16px;" id="wallet-sc-val">50.00</div>
+        </div>
+      </div>
+      <div style="text-align:left;">
+        <h4 style="margin:8px 0; color:var(--gold-bright);">Recent Ledger Audit Trail</h4>
+        <div id="wallet-tx-list" style="max-height:160px; overflow-y:auto; font-size:11px; opacity:0.9;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLATFORM REWARDS MODAL (WHEEL OF RA) -->
+<div class="modal-overlay hidden" id="rewards-modal">
+  <div class="modal-card" style="width: min(460px, 94vw);">
+    <div class="modal-header">
+      <h2>🎡 WHEEL OF RA BONUS</h2>
+      <button class="modal-close" id="closeRewardsModal">&times;</button>
+    </div>
+    <div class="modal-body" style="display:flex; flex-direction:column; align-items:center;">
+      <p style="font-size:12px; opacity:0.85; margin:4px 0 12px;">Spin the sacred wheel to win cash multipliers & jackpot drops!</p>
+
+      <!-- CANVAS WHEEL CONTAINER -->
+      <div class="wheel-stage" style="position:relative; width:260px; height:260px; margin:10px 0;">
+        <div class="wheel-pointer" style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); z-index:10; font-size:28px; filter:drop-shadow(0 2px 4px #000);">▼</div>
+        <canvas id="wheel-canvas" width="260" height="260" style="width:100%; height:100%; border-radius:50%; box-shadow:0 0 25px rgba(255, 207, 92, 0.6), inset 0 0 15px rgba(0,0,0,0.8);"></canvas>
+      </div>
+
+      <button class="btn btn-primary" id="spinWheelBtn" style="margin-top:12px; width:200px; font-size:16px;">SPIN WHEEL OF RA</button>
+      <div id="wheelRewardResult" style="margin-top:10px; font-weight:900; color:var(--gold-bright); font-size:15px; min-height:24px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PLATFORM PROMOTIONS MODAL -->
+<div class="modal-overlay hidden" id="promos-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>🎟️ Promotions & Bonus Drops</h2>
+      <button class="modal-close" id="closePromosModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; gap:8px; margin-bottom:14px;">
+        <input type="text" id="promoCodeInput" placeholder="Enter Promo Code (e.g. EGYPTGLOW2025)" style="flex:1; padding:8px; border-radius:8px; border:1px solid var(--gold); background:rgba(0,0,0,0.5); color:#fff; font-size:12px;">
+        <button class="btn btn-primary" id="redeemPromoBtn">Redeem</button>
+      </div>
+      <div id="promoMessage" style="font-size:12px; margin-bottom:10px;"></div>
+      <div id="promosList" style="text-align:left; font-size:12px; display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PLATFORM EVENTS MODAL -->
+<div class="modal-overlay hidden" id="events-modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2>⚔️ Weekly Tournaments & Events</h2>
+      <button class="modal-close" id="closeEventsModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div id="eventsContainer" style="text-align:left; display:flex; flex-direction:column; gap:12px;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- COIN PHYSICS FX CANVAS -->
 <canvas id="coin-fx-canvas"></canvas>
 
@@ -208,18 +393,19 @@
 <script src="js/audio.js"></script>
 <script src="js/slotMath.js"></script>
 <script src="js/engagement.js"></script>
-
 <script src="js/analytics.js"></script>
 <script src="js/bonusEngine.js"></script>
 <script src="js/pixiRenderer.js"></script>
 <script src="js/ui.js"></script>
-<script src="js/app.js"></script>
+
+<!-- PLATFORM MAIN APPLICATION MODULE -->
+<script type="module" src="js/app.js"></script>
 
 <!-- SERVICE WORKER REGISTRATION -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker.register('./sw.js')
         .then((reg) => console.log('Service Worker registered!', reg))
         .catch((err) => console.log('Service Worker registration failed:', err));
     });

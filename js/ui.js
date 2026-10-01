@@ -124,10 +124,30 @@ class UIController {
     const amountEl = document.getElementById('bigwin-amount');
 
     if (badge) badge.innerText = `✨ ${tierName.toUpperCase()} ✨`;
+
+    // Stage camera shake effect
+    const stage = document.getElementById('app-root');
+    if (stage) {
+      gsap.fromTo(stage,
+        { x: -10 },
+        { x: 10, duration: 0.08, repeat: 12, yoyo: true, ease: "sine.inOut", onComplete: () => gsap.set(stage, { x: 0 }) }
+      );
+    }
+
     if (amountEl) {
       amountEl.innerText = '$0.00';
       modal.classList.add('show');
-      this.animateCountUp(amountEl, 0, winAmount, 1.8);
+
+      // Animate modal card bounce
+      const card = modal.querySelector('.modal-card');
+      if (card) {
+        gsap.fromTo(card,
+          { scale: 0.5, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" }
+        );
+      }
+
+      this.animateCountUp(amountEl, 0, winAmount, 2.2);
     }
   }
 
