@@ -88,6 +88,27 @@ import { globalEventBus } from './game/eventBus.js';
     bindEvents();
     bindPlatformEvents();
     bindV2SpinControls();
+
+    // Listen for Intro Complete -> Transition directly to Egypt Glow V2 game
+    globalEventBus.on('INTRO_COMPLETE', () => {
+      soundEngine.startMusic();
+      const menu = $('main-menu');
+      if (menu) menu.classList.add('hidden');
+
+      const appRoot = $('app-root');
+      if (appRoot) appRoot.style.display = 'none';
+
+      const topBar = $('top-bar');
+      if (topBar) topBar.style.display = 'none';
+      const bottomHud = $('bottom-hud');
+      if (bottomHud) bottomHud.style.display = 'none';
+
+      const doors = $('door-container');
+      if (doors) {
+        doors.classList.add('open');
+        setTimeout(() => doors.remove(), 1300);
+      }
+    });
   }
 
   function bindV2SpinControls() {
@@ -150,167 +171,6 @@ import { globalEventBus } from './game/eventBus.js';
     const cfg = configEngine.getConfig();
     const lobbyRtp = $('lobby-rtp-val');
     if (lobbyRtp) lobbyRtp.innerText = `${cfg.targetRTP}%`;
-  }
-
-  async function executeSpinSequence() {
-    if (isSpinning) return;
-
-    const betAmount = slotEngine.bet;
-    if (!slotEngine.inFreeSpins && !walletEngine.deduct(betAmount, 'SPIN_BET')) {
-      const balVal = $('balance-val');
-      if (balVal) gsap.fromTo(balVal, { color: '#f43f5e' }, { color: '#ffd873', duration: 0.6 });
-      return;
-    }
-
-    isSpinning = true;
-    const spinBtn = $('spin-btn');
-    if (spinBtn) spinBtn.classList.add('spinning');
-    soundEngine.startSpinLoop();
-
-    if (!slotEngine.inFreeSpins) {
-      slotEngine.roundWin = 0;
-      slotEngine.resetMultipliers();
-    }
-
-    updatePlatformHUD();
-
-    slotEngine.grid = slotEngine.fillGrid(null);
-    await pixiRenderer.animateDropIn(slotEngine.grid, turboMode);
-    soundEngine.stopSpinLoop();
-
-    // Random Event Check (Ra's Blessing - Config Dependent)
-    if (configEngine.getConfig().featureFlags.rasBlessing && !slotEngine.inFreeSpins && Math.random() < 0.05) {
-      await new Promise(res => {
-        bonusEngine.triggerRandomEvent((evt) => {
-          if (evt.type === 'MULT_BOOST') slotEngine.bumpMultiplier();
-          res();
-        });
-      });
-    }
-
-    // Mystery Transformations
-    if (configEngine.getConfig().featureFlags.mysterySymbols) {
-      const mysterySym = slotEngine.transformMysterySymbols(slotEngine.grid);
-      if (mysterySym) {
-        pixiRenderer.renderGridInstant(slotEngine.grid);
-        soundEngine.playCascade();
-      }
-    }
-
-    let cascadeCount = 0;
-    let spinWinAmount = 0;
-
-    while (true) {
-      if (configEngine.getConfig().featureFlags.expandingWilds) {
-        const expandedCols = slotEngine.expandWilds(slotEngine.grid);
-        if (expandedCols.length > 0) {
-          await pixiRenderer.animateWildExpansion(expandedCols);
-          pixiRenderer.renderGridInstant(slotEngine.grid);
-        }
-      }
-
-      const { wins, winningCells, totalPay } = slotEngine.evaluateWins(slotEngine.grid);
-      if (wins.length === 0) break;
-
-      cascadeCount++;
-      if (cascadeCount > 1) {
-        slotEngine.bumpMultiplier();
-        soundEngine.playCascade();
-      }
-
-      const mult = slotEngine.effectiveMultiplier();
-      const payWithMult = totalPay * mult;
-      spinWinAmount += payWithMult;
-      slotEngine.roundWin += payWithMult;
-      if (slotEngine.inFreeSpins) slotEngine.fsTotalWin += payWithMult;
-
-      walletEngine.add(payWithMult, 'SPIN_WIN');
-
-      const winAmt = $('win-amt');
-      if (winAmt) winAmt.innerText = slotEngine.roundWin.toFixed(2);
-      const winBanner = $('win-banner');
-      if (winBanner) winBanner.classList.add('show');
-      soundEngine.playWinChime(cascadeCount);
-
-      await uiController.triggerWinCelebration(payWithMult, slotEngine.bet);
-      updatePlatformHUD();
-
-      await pixiRenderer.animateDissolve(winningCells);
-
-      winningCells.forEach(key => {
-        const [c, r] = key.split(',').map(Number);
-        slotEngine.grid[c][r] = null;
-      });
-
-      slotEngine.applyGravity(slotEngine.grid);
-      slotEngine.fillGrid(slotEngine.grid);
-      await pixiRenderer.animateDropIn(slotEngine.grid, turboMode);
-    }
-
-    // VIP XP & Live Event Progression
-    vipEngine.addXP(slotEngine.bet * 10);
-    eventEngine.recordSpinWin(spinWinAmount);
-
-    // Record Analytics & Engagement
-    analyticsEngine.trackSpin(slotEngine.bet, spinWinAmount);
-    const engResult = engagementEngine.recordSpin(
-      slotEngine.bet,
-      spinWinAmount,
-      cascadeCount > 1,
-      slotEngine.inFreeSpins
-    );
-
-    if (engResult.xpResult.leveledUp) {
-      soundEngine.playLevelUp();
-      openModal('levelup-modal');
-      const lvlNum = $('levelup-num');
-      if (lvlNum) lvlNum.innerText = engResult.xpResult.level;
-    }
-
-    let fsTriggeredThisSpin = false;
-
-    // Scatter Free Spins Trigger
-    if (configEngine.getConfig().featureFlags.freeSpins) {
-      const scatters = slotEngine.countScatters(slotEngine.grid);
-      if (scatters >= 3 && !slotEngine.inFreeSpins) {
-        slotEngine.inFreeSpins = true;
-        slotEngine.fsRemaining = 8;
-        slotEngine.fsTotalWin = 0;
-        fsTriggeredThisSpin = true;
-        soundEngine.playBonusTrigger();
-        analyticsEngine.trackBonusTrigger('FREE_SPINS');
-        openModal('bigwin-modal');
-        const bigwinAmt = $('bigwin-amount');
-        if (bigwinAmt) bigwinAmt.innerText = "8 FREE SPINS!";
-      }
-    }
-
-    // Pick Bonus Trigger
-    if (configEngine.getConfig().featureFlags.pickBonus && !slotEngine.inFreeSpins && slotEngine.roundWin === 0 && Math.random() < 0.03) {
-      analyticsEngine.trackBonusTrigger('PICK_BONUS');
-      await new Promise(res => {
-        bonusEngine.triggerPickBonus(() => res());
-      });
-    }
-
-    if (slotEngine.inFreeSpins && !fsTriggeredThisSpin) {
-      slotEngine.fsRemaining--;
-      if (slotEngine.fsRemaining <= 0) {
-        slotEngine.inFreeSpins = false;
-        openModal('summary-modal');
-        const sumAmt = $('summary-amount');
-        if (sumAmt) sumAmt.innerText = slotEngine.fsTotalWin.toFixed(2);
-        uiController.coinFX.spawnCoins(120);
-      }
-    }
-
-    if (spinBtn) spinBtn.classList.remove('spinning');
-    isSpinning = false;
-    updatePlatformHUD();
-
-    if (autoSpin && (!slotEngine.inFreeSpins || slotEngine.fsRemaining > 0)) {
-      setTimeout(executeSpinSequence, turboMode ? 150 : 600);
-    }
   }
 
   function openModal(id) {
@@ -549,87 +409,19 @@ import { globalEventBus } from './game/eventBus.js';
         const menu = $('main-menu');
         if (menu) menu.classList.add('hidden');
 
+        const appRoot = $('app-root');
+        if (appRoot) appRoot.style.display = 'none';
+
+        const topBar = $('top-bar');
+        if (topBar) topBar.style.display = 'none';
+        const bottomHud = $('bottom-hud');
+        if (bottomHud) bottomHud.style.display = 'none';
+
         const doors = $('door-container');
         if (doors) {
           doors.classList.add('open');
           setTimeout(() => doors.remove(), 1300);
         }
-      });
-    }
-
-    const spinBtn = $('spin-btn');
-    if (spinBtn) {
-      spinBtn.addEventListener('click', () => {
-        soundEngine.playClick();
-        executeSpinSequence();
-      });
-    }
-
-    const betPlus = $('bet-plus');
-    if (betPlus) {
-      betPlus.addEventListener('click', () => {
-        soundEngine.playClick();
-        if (!isSpinning) {
-          slotEngine.incBet();
-          uiController.refreshHUD();
-        }
-      });
-    }
-
-    const betMinus = $('bet-minus');
-    if (betMinus) {
-      betMinus.addEventListener('click', () => {
-        soundEngine.playClick();
-        if (!isSpinning) {
-          slotEngine.decBet();
-          uiController.refreshHUD();
-        }
-      });
-    }
-
-    const turboBtn = $('turbo-btn');
-    if (turboBtn) {
-      turboBtn.addEventListener('click', () => {
-        soundEngine.playClick();
-        turboMode = !turboMode;
-        turboBtn.classList.toggle('on', turboMode);
-      });
-    }
-
-    const autoBtn = $('auto-btn');
-    if (autoBtn) {
-      autoBtn.addEventListener('click', () => {
-        soundEngine.playClick();
-        autoSpin = !autoSpin;
-        autoBtn.classList.toggle('on', autoSpin);
-        if (autoSpin && !isSpinning) executeSpinSequence();
-      });
-    }
-
-    const infoBtn = $('info-btn');
-    if (infoBtn) {
-      infoBtn.addEventListener('click', () => {
-        soundEngine.playClick();
-        uiController.buildPaytableUI();
-        openModal('paytable-modal');
-      });
-    }
-
-    const achBtn = $('achievements-btn');
-    if (achBtn) {
-      achBtn.addEventListener('click', () => {
-        soundEngine.playClick();
-        uiController.buildAchievementsUI();
-        openModal('achievements-modal');
-      });
-    }
-
-    const missBtn = $('missions-btn');
-    if (missBtn) {
-      missBtn.addEventListener('click', () => {
-        soundEngine.playClick();
-        uiController.buildMissionsUI();
-        openModal('missions-modal');
       });
     }
 

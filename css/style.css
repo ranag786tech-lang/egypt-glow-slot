@@ -996,7 +996,7 @@ canvas { display: block; }
   font-family: 'Georgia', serif;
   font-size: clamp(32px, 8vw, 64px);
   font-weight: 900;
-  letter-spacing: 6px;
+  letter-spacing: 2px;
   background: linear-gradient(180deg, #ffffff 0%, #ffd873 40%, #e8b544 70%, #9e6315 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1007,7 +1007,7 @@ canvas { display: block; }
 
 .v2-intro-subtitle {
   font-size: clamp(14px, 3vw, 24px);
-  letter-spacing: 10px;
+  letter-spacing: 2px;
   color: #fff3c4;
   margin-top: 8px;
   font-weight: 700;
@@ -1073,7 +1073,7 @@ canvas { display: block; }
 .v2-loading-title {
   font-size: 16px;
   font-weight: 900;
-  letter-spacing: 4px;
+  letter-spacing: 1px;
   color: var(--gold-bright);
   margin-bottom: 16px;
 }
@@ -1277,7 +1277,7 @@ canvas { display: block; }
   font-family: 'Georgia', serif;
   font-size: 14px;
   font-weight: 900;
-  letter-spacing: 4px;
+  letter-spacing: 1px;
   color: var(--gold-bright);
   text-shadow: 0 0 10px var(--gold);
 }
@@ -1553,6 +1553,14 @@ canvas { display: block; }
   font-weight: 900;
   font-size: 16px;
   box-shadow: 0 0 15px var(--gold-bright);
+}
+
+.v2-intro-container.hidden,
+.v2-loading-container.hidden,
+.v2-win-modal-container.hidden,
+.v2-codex-container.hidden,
+.v2-subtitle-overlay.hidden {
+  display: none !important;
 }
 
 /* TEMPLE CODEX OVERLAY */
