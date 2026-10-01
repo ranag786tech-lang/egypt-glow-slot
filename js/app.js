@@ -14,6 +14,17 @@ import { ThemeEngine } from './platform/themeEngine.js';
 import { AdminPanel } from './platform/adminPanel.js';
 import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
 
+// Import V2 Cinematic Architecture & Synthesizer
+import { introSequence } from './ui/introSequence.js';
+import { loadingScreen } from './ui/loadingScreen.js';
+import { dynamicBackground } from './ui/dynamicBackground.js';
+import { gameHUD } from './ui/gameHUD.js';
+import { ReelEngine } from './game/reelEngine.js';
+import { winCelebrations } from './ui/winCelebrations.js';
+import { templeCodex } from './ui/templeCodex.js';
+import { v2AudioEngine } from './audio/v2AudioEngine.js';
+import { globalEventBus } from './game/eventBus.js';
+
 (function () {
   "use strict";
 
@@ -47,9 +58,21 @@ import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
   let autoSpin = false;
   let turboMode = false;
 
+  let reelEngine = null;
+
   function initApp() {
-    pixiRenderer = new window.PixiRenderer('pixi-holder', slotEngine, soundEngine);
+    v2AudioEngine.init();
+    dynamicBackground.init();
+    gameHUD.init();
+    winCelebrations.init();
+    templeCodex.init();
+    introSequence.init();
+    loadingScreen.init();
+
+    pixiRenderer = new window.PixiRenderer('v2-pixi-holder', slotEngine, soundEngine);
     pixiRenderer.init();
+
+    reelEngine = new ReelEngine(slotEngine, pixiRenderer);
 
     uiController = new window.UIController(slotEngine, soundEngine, engagementEngine, analyticsEngine);
     uiController.buildPaytableUI();
@@ -64,13 +87,57 @@ import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
     updatePlatformHUD();
     bindEvents();
     bindPlatformEvents();
+    bindV2SpinControls();
+  }
+
+  function bindV2SpinControls() {
+    const spinBtn = $('v2-spin-btn');
+    if (spinBtn) {
+      spinBtn.onclick = async () => {
+        if (isSpinning) return;
+        if (!slotEngine.inFreeSpins && !walletEngine.deduct(slotEngine.bet, 'SPIN_BET')) {
+          globalEventBus.emit('NARRATOR_SUBTITLE', { text: "NOT ENOUGH GLOW POINTS!" });
+          return;
+        }
+
+        isSpinning = true;
+        updatePlatformHUD();
+
+        await reelEngine.spinSequence(turboMode);
+
+        isSpinning = false;
+        updatePlatformHUD();
+      };
+    }
+
+    const betMinus = $('v2-bet-minus');
+    const betPlus = $('v2-bet-plus');
+    if (betMinus) {
+      betMinus.onclick = () => {
+        if (!isSpinning) {
+          slotEngine.decBet();
+          const display = $('v2-bet-val');
+          if (display) display.innerText = slotEngine.bet;
+        }
+      };
+    }
+    if (betPlus) {
+      betPlus.onclick = () => {
+        if (!isSpinning) {
+          slotEngine.incBet();
+          const display = $('v2-bet-val');
+          if (display) display.innerText = slotEngine.bet;
+        }
+      };
+    }
   }
 
   function updatePlatformHUD() {
     // Wallet Sync
     const currentBal = walletEngine.getBalance();
     slotEngine.balance = currentBal;
-    $('balance-val').innerText = currentBal.toFixed(2);
+    const balVal = $('balance-val');
+    if (balVal) balVal.innerText = currentBal.toFixed(2);
 
     // VIP Sync
     const vipTier = vipEngine.getCurrentTier();
@@ -90,12 +157,14 @@ import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
 
     const betAmount = slotEngine.bet;
     if (!slotEngine.inFreeSpins && !walletEngine.deduct(betAmount, 'SPIN_BET')) {
-      gsap.fromTo($('balance-val'), { color: '#f43f5e' }, { color: '#ffd873', duration: 0.6 });
+      const balVal = $('balance-val');
+      if (balVal) gsap.fromTo(balVal, { color: '#f43f5e' }, { color: '#ffd873', duration: 0.6 });
       return;
     }
 
     isSpinning = true;
-    $('spin-btn').classList.add('spinning');
+    const spinBtn = $('spin-btn');
+    if (spinBtn) spinBtn.classList.add('spinning');
     soundEngine.startSpinLoop();
 
     if (!slotEngine.inFreeSpins) {
@@ -157,8 +226,10 @@ import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
 
       walletEngine.add(payWithMult, 'SPIN_WIN');
 
-      $('win-amt').innerText = slotEngine.roundWin.toFixed(2);
-      $('win-banner').classList.add('show');
+      const winAmt = $('win-amt');
+      if (winAmt) winAmt.innerText = slotEngine.roundWin.toFixed(2);
+      const winBanner = $('win-banner');
+      if (winBanner) winBanner.classList.add('show');
       soundEngine.playWinChime(cascadeCount);
 
       await uiController.triggerWinCelebration(payWithMult, slotEngine.bet);
@@ -192,7 +263,8 @@ import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
     if (engResult.xpResult.leveledUp) {
       soundEngine.playLevelUp();
       openModal('levelup-modal');
-      $('levelup-num').innerText = engResult.xpResult.level;
+      const lvlNum = $('levelup-num');
+      if (lvlNum) lvlNum.innerText = engResult.xpResult.level;
     }
 
     let fsTriggeredThisSpin = false;
@@ -208,7 +280,8 @@ import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
         soundEngine.playBonusTrigger();
         analyticsEngine.trackBonusTrigger('FREE_SPINS');
         openModal('bigwin-modal');
-        $('bigwin-amount').innerText = "8 FREE SPINS!";
+        const bigwinAmt = $('bigwin-amount');
+        if (bigwinAmt) bigwinAmt.innerText = "8 FREE SPINS!";
       }
     }
 
@@ -225,12 +298,13 @@ import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
       if (slotEngine.fsRemaining <= 0) {
         slotEngine.inFreeSpins = false;
         openModal('summary-modal');
-        $('summary-amount').innerText = slotEngine.fsTotalWin.toFixed(2);
+        const sumAmt = $('summary-amount');
+        if (sumAmt) sumAmt.innerText = slotEngine.fsTotalWin.toFixed(2);
         uiController.coinFX.spawnCoins(120);
       }
     }
 
-    $('spin-btn').classList.remove('spinning');
+    if (spinBtn) spinBtn.classList.remove('spinning');
     isSpinning = false;
     updatePlatformHUD();
 
@@ -251,22 +325,26 @@ import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
 
   function bindPlatformEvents() {
     // Wallet Modal
-    $('platform-wallet-btn').onclick = () => {
-      soundEngine.playClick();
-      $('wallet-gc-val').textContent = walletEngine.getBalance('GC').toLocaleString();
-      $('wallet-sc-val').textContent = walletEngine.getBalance('SC').toFixed(2);
+    const walletBtn = $('platform-wallet-btn');
+    if (walletBtn) {
+      walletBtn.onclick = () => {
+        soundEngine.playClick();
+        $('wallet-gc-val').textContent = walletEngine.getBalance('GC').toLocaleString();
+        $('wallet-sc-val').textContent = walletEngine.getBalance('SC').toFixed(2);
 
-      const list = $('wallet-tx-list');
-      list.innerHTML = walletEngine.getTransactionHistory().map(tx => `
-        <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1); padding:4px 0;">
-          <span>${tx.type}</span>
-          <span style="color:${tx.amount >= 0 ? '#7ad89a' : '#ff9d73'}">${tx.amount >= 0 ? '+' : ''}${tx.amount.toFixed(2)} ${tx.currency}</span>
-        </div>
-      `).join('');
+        const list = $('wallet-tx-list');
+        list.innerHTML = walletEngine.getTransactionHistory().map(tx => `
+          <div style="display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.1); padding:4px 0;">
+            <span>${tx.type}</span>
+            <span style="color:${tx.amount >= 0 ? '#7ad89a' : '#ff9d73'}">${tx.amount >= 0 ? '+' : ''}${tx.amount.toFixed(2)} ${tx.currency}</span>
+          </div>
+        `).join('');
 
-      openModal('wallet-modal');
-    };
-    $('closeWalletModal').onclick = () => closeModal('wallet-modal');
+        openModal('wallet-modal');
+      };
+    }
+    const closeWallet = $('closeWalletModal');
+    if (closeWallet) closeWallet.onclick = () => closeModal('wallet-modal');
 
     // Reward Center Modal (Wheel of Ra)
     const drawWheelCanvas = (rotation = 0) => {
@@ -313,190 +391,257 @@ import { AnalyticsDashboard } from './platform/analyticsDashboard.js';
       ctx.stroke();
     };
 
-    $('platform-rewards-btn').onclick = () => {
-      soundEngine.playClick();
-      drawWheelCanvas(0);
-      openModal('rewards-modal');
-    };
-    $('closeRewardsModal').onclick = () => closeModal('rewards-modal');
+    const rewardsBtn = $('platform-rewards-btn');
+    if (rewardsBtn) {
+      rewardsBtn.onclick = () => {
+        soundEngine.playClick();
+        drawWheelCanvas(0);
+        openModal('rewards-modal');
+      };
+    }
+    const closeRewards = $('closeRewardsModal');
+    if (closeRewards) closeRewards.onclick = () => closeModal('rewards-modal');
 
     let wheelSpinning = false;
-    $('spinWheelBtn').onclick = () => {
-      if (wheelSpinning) return;
-      soundEngine.playClick();
-      const res = rewardCenter.spinDailyWheel();
-      const resultDiv = $('wheelRewardResult');
+    const spinWheelBtn = $('spinWheelBtn');
+    if (spinWheelBtn) {
+      spinWheelBtn.onclick = () => {
+        if (wheelSpinning) return;
+        soundEngine.playClick();
+        const res = rewardCenter.spinDailyWheel();
+        const resultDiv = $('wheelRewardResult');
 
-      if (res.success) {
-        wheelSpinning = true;
-        resultDiv.textContent = '🎡 Spinning the sacred wheel...';
+        if (res.success) {
+          wheelSpinning = true;
+          resultDiv.textContent = '🎡 Spinning the sacred wheel...';
 
-        let currentRot = 0;
-        const totalRot = Math.PI * 2 * 5 + Math.random() * Math.PI * 2;
+          let currentRot = 0;
+          const totalRot = Math.PI * 2 * 5 + Math.random() * Math.PI * 2;
 
-        gsap.to({ rot: 0 }, {
-          rot: totalRot,
-          duration: 3.5,
-          ease: 'power4.out',
-          onUpdate: function() {
-            drawWheelCanvas(this.targets()[0].rot);
-            soundEngine.playClick();
-          },
-          onComplete: () => {
-            wheelSpinning = false;
-            resultDiv.textContent = `🎉 You won $${res.reward.value}!`;
-            soundEngine.playBonusTrigger();
-            uiController.coinFX.spawnCoins(80);
-            updatePlatformHUD();
-          }
-        });
-      } else {
-        resultDiv.textContent = `⏳ ${res.reason}`;
-      }
-    };
+          gsap.to({ rot: 0 }, {
+            rot: totalRot,
+            duration: 3.5,
+            ease: 'power4.out',
+            onUpdate: function() {
+              drawWheelCanvas(this.targets()[0].rot);
+              soundEngine.playClick();
+            },
+            onComplete: () => {
+              wheelSpinning = false;
+              resultDiv.textContent = `🎉 You won $${res.reward.value}!`;
+              soundEngine.playBonusTrigger();
+              uiController.coinFX.spawnCoins(80);
+              updatePlatformHUD();
+            }
+          });
+        } else {
+          resultDiv.textContent = `⏳ ${res.reason}`;
+        }
+      };
+    }
 
     // Promotions Modal
-    $('platform-promos-btn').onclick = () => {
-      soundEngine.playClick();
-      renderPromotionsList();
-      openModal('promos-modal');
-    };
-    $('closePromosModal').onclick = () => closeModal('promos-modal');
-
-    $('redeemPromoBtn').onclick = () => {
-      soundEngine.playClick();
-      const code = $('promoCodeInput').value;
-      const res = promotionsEngine.redeemCode(code);
-      const msg = $('promoMessage');
-      msg.textContent = res.message;
-      msg.style.color = res.success ? '#7ad89a' : '#ff9d73';
-      if (res.success) {
-        updatePlatformHUD();
+    const promosBtn = $('platform-promos-btn');
+    if (promosBtn) {
+      promosBtn.onclick = () => {
+        soundEngine.playClick();
         renderPromotionsList();
-      }
-    };
+        openModal('promos-modal');
+      };
+    }
+    const closePromos = $('closePromosModal');
+    if (closePromos) closePromos.onclick = () => closeModal('promos-modal');
+
+    const redeemBtn = $('redeemPromoBtn');
+    if (redeemBtn) {
+      redeemBtn.onclick = () => {
+        soundEngine.playClick();
+        const code = $('promoCodeInput').value;
+        const res = promotionsEngine.redeemCode(code);
+        const msg = $('promoMessage');
+        msg.textContent = res.message;
+        msg.style.color = res.success ? '#7ad89a' : '#ff9d73';
+        if (res.success) {
+          updatePlatformHUD();
+          renderPromotionsList();
+        }
+      };
+    }
 
     function renderPromotionsList() {
       const promos = promotionsEngine.getActivePromotions();
-      $('promosList').innerHTML = promos.map(p => `
-        <div style="background:rgba(0,0,0,0.4); padding:8px; border-radius:8px; border:1px solid rgba(232,181,68,0.3); display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <div style="font-weight:800; color:var(--gold-bright);">${p.title}</div>
-            <div style="font-size:10px; opacity:0.8;">Code: ${p.code}</div>
+      const list = $('promosList');
+      if (list) {
+        list.innerHTML = promos.map(p => `
+          <div style="background:rgba(0,0,0,0.4); padding:8px; border-radius:8px; border:1px solid rgba(232,181,68,0.3); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:800; color:var(--gold-bright);">${p.title}</div>
+              <div style="font-size:10px; opacity:0.8;">Code: ${p.code}</div>
+            </div>
+            <span style="font-weight:800; color:${p.redeemed ? '#7ad89a' : 'var(--gold)'};">${p.redeemed ? 'CLAIMED' : 'ACTIVE'}</span>
           </div>
-          <span style="font-weight:800; color:${p.redeemed ? '#7ad89a' : 'var(--gold)'};">${p.redeemed ? 'CLAIMED' : 'ACTIVE'}</span>
-        </div>
-      `).join('');
+        `).join('');
+      }
     }
 
     // Events Modal
-    $('platform-events-btn').onclick = () => {
-      soundEngine.playClick();
-      const events = eventEngine.getActiveEvents();
-      $('eventsContainer').innerHTML = events.map(e => `
-        <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:10px; border:1px solid var(--gold);">
-          <div style="font-weight:900; color:var(--gold-bright); font-size:14px;">${e.title}</div>
-          <div style="font-size:11px; margin:4px 0;">Prize Pool: <strong>${e.prizePool}</strong> · Ends in ${e.endsInHours}h</div>
-          ${e.userEntry ? `<div style="font-size:11px; color:#00f2fe;">Your Standings: Rank <strong>${e.userEntry.rank}</strong> (${e.userEntry.score.toLocaleString()} pts)</div>` : ''}
-        </div>
-      `).join('');
-      openModal('events-modal');
-    };
-    $('closeEventsModal').onclick = () => closeModal('events-modal');
+    const eventsBtn = $('platform-events-btn');
+    if (eventsBtn) {
+      eventsBtn.onclick = () => {
+        soundEngine.playClick();
+        const events = eventEngine.getActiveEvents();
+        const container = $('eventsContainer');
+        if (container) {
+          container.innerHTML = events.map(e => `
+            <div style="background:rgba(0,0,0,0.5); padding:10px; border-radius:10px; border:1px solid var(--gold);">
+              <div style="font-weight:900; color:var(--gold-bright); font-size:14px;">${e.title}</div>
+              <div style="font-size:11px; margin:4px 0;">Prize Pool: <strong>${e.prizePool}</strong> · Ends in ${e.endsInHours}h</div>
+              ${e.userEntry ? `<div style="font-size:11px; color:#00f2fe;">Your Standings: Rank <strong>${e.userEntry.rank}</strong> (${e.userEntry.score.toLocaleString()} pts)</div>` : ''}
+            </div>
+          `).join('');
+        }
+        openModal('events-modal');
+      };
+    }
+    const closeEvents = $('closeEventsModal');
+    if (closeEvents) closeEvents.onclick = () => closeModal('events-modal');
 
     // Admin & Analytics
-    $('platform-admin-btn').onclick = () => {
-      soundEngine.playClick();
-      adminPanel.show();
-    };
+    const adminBtn = $('platform-admin-btn');
+    if (adminBtn) {
+      adminBtn.onclick = () => {
+        soundEngine.playClick();
+        adminPanel.show();
+      };
+    }
 
-    $('platform-analytics-btn').onclick = () => {
-      soundEngine.playClick();
-      analyticsDashboard.show();
-    };
+    const analyticsBtn = $('platform-analytics-btn');
+    if (analyticsBtn) {
+      analyticsBtn.onclick = () => {
+        soundEngine.playClick();
+        analyticsDashboard.show();
+      };
+    }
 
     // Localization & Theme Dropdowns
-    $('lang-select').onchange = (e) => {
-      i18nEngine.setLanguage(e.target.value);
-    };
+    const langSel = $('lang-select');
+    if (langSel) {
+      langSel.onchange = (e) => {
+        i18nEngine.setLanguage(e.target.value);
+      };
+    }
 
-    $('theme-select').onchange = (e) => {
-      themeEngine.applyTheme(e.target.value);
-    };
+    const themeSel = $('theme-select');
+    if (themeSel) {
+      themeSel.onchange = (e) => {
+        themeEngine.applyTheme(e.target.value);
+      };
+    }
   }
 
   function bindEvents() {
     // Menu & Lobby
-    $('play-game-btn').addEventListener('click', () => {
-      soundEngine.playClick();
-      soundEngine.startMusic();
-      $('main-menu').classList.add('hidden');
+    const playBtn = $('play-game-btn');
+    if (playBtn) {
+      playBtn.addEventListener('click', () => {
+        soundEngine.playClick();
+        soundEngine.startMusic();
+        const menu = $('main-menu');
+        if (menu) menu.classList.add('hidden');
 
-      const doors = $('door-container');
-      if (doors) {
-        doors.classList.add('open');
-        setTimeout(() => doors.remove(), 1300);
-      }
-    });
+        const doors = $('door-container');
+        if (doors) {
+          doors.classList.add('open');
+          setTimeout(() => doors.remove(), 1300);
+        }
+      });
+    }
 
-    $('spin-btn').addEventListener('click', () => {
-      soundEngine.playClick();
-      executeSpinSequence();
-    });
+    const spinBtn = $('spin-btn');
+    if (spinBtn) {
+      spinBtn.addEventListener('click', () => {
+        soundEngine.playClick();
+        executeSpinSequence();
+      });
+    }
 
-    $('bet-plus').addEventListener('click', () => {
-      soundEngine.playClick();
-      if (!isSpinning) {
-        slotEngine.incBet();
-        uiController.refreshHUD();
-      }
-    });
+    const betPlus = $('bet-plus');
+    if (betPlus) {
+      betPlus.addEventListener('click', () => {
+        soundEngine.playClick();
+        if (!isSpinning) {
+          slotEngine.incBet();
+          uiController.refreshHUD();
+        }
+      });
+    }
 
-    $('bet-minus').addEventListener('click', () => {
-      soundEngine.playClick();
-      if (!isSpinning) {
-        slotEngine.decBet();
-        uiController.refreshHUD();
-      }
-    });
+    const betMinus = $('bet-minus');
+    if (betMinus) {
+      betMinus.addEventListener('click', () => {
+        soundEngine.playClick();
+        if (!isSpinning) {
+          slotEngine.decBet();
+          uiController.refreshHUD();
+        }
+      });
+    }
 
-    $('turbo-btn').addEventListener('click', () => {
-      soundEngine.playClick();
-      turboMode = !turboMode;
-      $('turbo-btn').classList.toggle('on', turboMode);
-    });
+    const turboBtn = $('turbo-btn');
+    if (turboBtn) {
+      turboBtn.addEventListener('click', () => {
+        soundEngine.playClick();
+        turboMode = !turboMode;
+        turboBtn.classList.toggle('on', turboMode);
+      });
+    }
 
-    $('auto-btn').addEventListener('click', () => {
-      soundEngine.playClick();
-      autoSpin = !autoSpin;
-      $('auto-btn').classList.toggle('on', autoSpin);
-      if (autoSpin && !isSpinning) executeSpinSequence();
-    });
+    const autoBtn = $('auto-btn');
+    if (autoBtn) {
+      autoBtn.addEventListener('click', () => {
+        soundEngine.playClick();
+        autoSpin = !autoSpin;
+        autoBtn.classList.toggle('on', autoSpin);
+        if (autoSpin && !isSpinning) executeSpinSequence();
+      });
+    }
 
-    $('info-btn').addEventListener('click', () => {
-      soundEngine.playClick();
-      uiController.buildPaytableUI();
-      openModal('paytable-modal');
-    });
+    const infoBtn = $('info-btn');
+    if (infoBtn) {
+      infoBtn.addEventListener('click', () => {
+        soundEngine.playClick();
+        uiController.buildPaytableUI();
+        openModal('paytable-modal');
+      });
+    }
 
-    $('achievements-btn').addEventListener('click', () => {
-      soundEngine.playClick();
-      uiController.buildAchievementsUI();
-      openModal('achievements-modal');
-    });
+    const achBtn = $('achievements-btn');
+    if (achBtn) {
+      achBtn.addEventListener('click', () => {
+        soundEngine.playClick();
+        uiController.buildAchievementsUI();
+        openModal('achievements-modal');
+      });
+    }
 
-    $('missions-btn').addEventListener('click', () => {
-      soundEngine.playClick();
-      uiController.buildMissionsUI();
-      openModal('missions-modal');
-    });
+    const missBtn = $('missions-btn');
+    if (missBtn) {
+      missBtn.addEventListener('click', () => {
+        soundEngine.playClick();
+        uiController.buildMissionsUI();
+        openModal('missions-modal');
+      });
+    }
 
-    $('sound-toggle').addEventListener('click', () => {
-      soundEngine.unlock();
-      const nowMuted = soundEngine.toggleMute();
-      $('sound-toggle').textContent = nowMuted ? '🔇' : '🔊';
-      $('sound-toggle').classList.toggle('muted', nowMuted);
-    });
+    const soundToggle = $('sound-toggle');
+    if (soundToggle) {
+      soundToggle.addEventListener('click', () => {
+        soundEngine.unlock();
+        const nowMuted = soundEngine.toggleMute();
+        soundToggle.textContent = nowMuted ? '🔇' : '🔊';
+        soundToggle.classList.toggle('muted', nowMuted);
+      });
+    }
 
     // Close Modal Listeners
     ['paytable-close', 'bigwin-close', 'summary-close', 'achievements-close', 'missions-close', 'levelup-close'].forEach(btnId => {

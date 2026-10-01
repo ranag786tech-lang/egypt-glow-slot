@@ -270,7 +270,7 @@ class PixiRenderer {
       for (let r = 0; r < ROWS; r++) {
         const sym = g[c][r];
         if (sym && this.cellSprites[c][r]) {
-          this.cellSprites[c][r].texture = this.symbolTextures[sym];
+          this.cellSprites[c][r].texture = this.symbolTextures[sym] || this.symbolTextures.ANKH;
           this.cellSprites[c][r].alpha = 1;
           this.cellSprites[c][r].scale.set((this.cellSize - 4) / 128);
         }
@@ -308,6 +308,40 @@ class PixiRenderer {
     });
   }
 
+  async animateColumnDrop(c, colSymbols, turboMode) {
+    const promises = [];
+    const duration = turboMode ? 0.12 : 0.28;
+    const delayStep = turboMode ? 0.01 : 0.03;
+
+    for (let r = 0; r < ROWS; r++) {
+      const sym = colSymbols[r];
+      const spr = this.cellSprites[c][r];
+      if (sym && spr) {
+        spr.texture = this.symbolTextures[sym] || this.symbolTextures.ANKH;
+        spr.alpha = 1;
+        const targetY = r * this.cellSize + this.cellSize / 2;
+        spr.y = targetY - this.gridH - 100;
+        spr.scale.set((this.cellSize - 4) / 128);
+        spr.scale.y = ((this.cellSize - 4) / 128) * 1.3;
+
+        promises.push(new Promise(res => {
+          gsap.to(spr, {
+            y: targetY,
+            duration: duration,
+            ease: turboMode ? 'power2.out' : 'back.out(1.2)',
+            delay: r * delayStep,
+            onComplete: () => {
+              spr.scale.set((this.cellSize - 4) / 128);
+              if (r === ROWS - 1 && this.soundEngine) this.soundEngine.playReelStop();
+              res();
+            }
+          });
+        }));
+      }
+    }
+    await Promise.all(promises);
+  }
+
   async animateDropIn(g, turboMode) {
     this.renderGridInstant(g);
     const promises = [];
@@ -336,7 +370,7 @@ class PixiRenderer {
             },
             onComplete: () => {
               spr.scale.set((this.cellSize - 4) / 128);
-              if (r === ROWS - 1) this.soundEngine.playReelStop();
+              if (r === ROWS - 1 && this.soundEngine) this.soundEngine.playReelStop();
               res();
             }
           });
@@ -388,18 +422,20 @@ class PixiRenderer {
 
   triggerScreenShake(intensity = 8, duration = 0.35) {
     const stage = document.getElementById('stage-wrap');
-    gsap.fromTo(stage,
-      { x: 0, y: 0 },
-      {
-        x: () => (Math.random() - 0.5) * intensity,
-        y: () => (Math.random() - 0.5) * intensity,
-        duration: 0.04,
-        repeat: Math.floor(duration / 0.04),
-        yoyo: true,
-        ease: 'power1.inOut',
-        onComplete: () => gsap.set(stage, { x: 0, y: 0 })
-      }
-    );
+    if (stage && window.gsap) {
+      gsap.fromTo(stage,
+        { x: 0, y: 0 },
+        {
+          x: () => (Math.random() - 0.5) * intensity,
+          y: () => (Math.random() - 0.5) * intensity,
+          duration: 0.04,
+          repeat: Math.floor(duration / 0.04),
+          yoyo: true,
+          ease: 'power1.inOut',
+          onComplete: () => gsap.set(stage, { x: 0, y: 0 })
+        }
+      );
+    }
   }
 }
 
