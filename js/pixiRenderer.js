@@ -65,46 +65,146 @@ class PixiRenderer {
     Object.values(SYMBOLS).forEach(sym => {
       const size = 128;
 
-      // Base texture creation
       const g = new PIXI.Container();
       const bg = new PIXI.Graphics();
-      let bgColor = 0x241608;
+
+      let bgColor = 0x1f140a;
       let borderColor = sym.color;
 
-      if (sym.tier === 'wild') bgColor = 0x3a2400;
-      if (sym.tier === 'scatter') bgColor = 0x2a1030;
-      if (sym.tier === 'special') bgColor = 0x1f0a30;
+      if (sym.tier === 'wild') bgColor = 0x3d2402;
+      if (sym.tier === 'scatter') bgColor = 0x2b0d1e;
+      if (sym.tier === 'special') bgColor = 0x1a0a28;
 
-      // Card Background with outer glow frame
-      bg.beginFill(bgColor, 0.94);
-      bg.lineStyle(5, borderColor, 0.95);
-      bg.drawRoundedRect(4, 4, size - 8, size - 8, 20);
+      // Outer Gold Frame & Card Base
+      bg.beginFill(bgColor, 0.95);
+      bg.lineStyle(4, borderColor, 0.9);
+      bg.drawRoundedRect(4, 4, size - 8, size - 8, 18);
       bg.endFill();
 
-      // Inner gold bevel highlight
-      bg.lineStyle(1.5, 0xffe9a8, 0.35);
-      bg.drawRoundedRect(8, 8, size - 16, size - 16, 16);
+      // Inner Bevel Gold Border
+      bg.lineStyle(2, 0xffe9a8, 0.4);
+      bg.drawRoundedRect(8, 8, size - 16, size - 16, 14);
 
       g.addChild(bg);
 
-      // Symbol Text Glyph
-      const txt = new PIXI.Text(sym.glyph, {
-        fontFamily: 'Arial Unicode MS, Segoe UI Symbol, sans-serif',
-        fontSize: sym.tier === 'low' ? 56 : 66,
-        fontWeight: '900',
-        fill: sym.tier === 'low' ? 0xf0e0c0 : sym.color,
-        align: 'center',
-        stroke: 0x000000,
-        strokeThickness: sym.tier === 'low' ? 2 : 4,
-        dropShadow: true,
-        dropShadowColor: 0x000000,
-        dropShadowBlur: 8,
-        dropShadowDistance: 3
-      });
-      txt.anchor.set(0.5);
-      txt.x = size / 2;
-      txt.y = size / 2;
-      g.addChild(txt);
+      // Ultra-HD Custom Vector Graphic Layer
+      const iconG = new PIXI.Graphics();
+      const cx = size / 2;
+      const cy = size / 2;
+
+      switch (sym.id) {
+        case 'PHARAOH':
+          // Pharaoh Crown
+          iconG.beginFill(0xffd873, 1);
+          iconG.drawPolygon([cx, cy - 32, cx + 28, cy + 12, cx + 18, cy + 28, cx - 18, cy + 28, cx - 28, cy + 12]);
+          iconG.endFill();
+          iconG.beginFill(0x1c3d6e, 1);
+          iconG.drawCircle(cx, cy - 4, 10);
+          iconG.endFill();
+          break;
+
+        case 'QUEEN':
+          // Cleopatra Tiara
+          iconG.beginFill(0xe85a9d, 1);
+          iconG.drawPolygon([cx, cy - 30, cx + 24, cy - 8, cx + 16, cy + 24, cx - 16, cy + 24, cx - 24, cy - 8]);
+          iconG.endFill();
+          iconG.beginFill(0xffd873, 1);
+          iconG.drawCircle(cx, cy + 2, 8);
+          iconG.endFill();
+          break;
+
+        case 'SCARAB':
+          // Scarab Beetle
+          iconG.beginFill(0x00f2fe, 1);
+          iconG.drawEllipse(cx, cy, 22, 28);
+          iconG.endFill();
+          iconG.lineStyle(2, 0xffd873, 1);
+          iconG.moveTo(cx - 22, cy); iconG.lineTo(cx + 22, cy);
+          break;
+
+        case 'HORUS':
+          // Eye of Horus
+          iconG.lineStyle(5, 0xc8203f, 1);
+          iconG.drawEllipse(cx, cy - 4, 24, 14);
+          iconG.beginFill(0xffd873, 1);
+          iconG.drawCircle(cx, cy - 4, 8);
+          iconG.endFill();
+          break;
+
+        case 'ANUBIS':
+          // Anubis Mask
+          iconG.beginFill(0x1c3d6e, 1);
+          iconG.drawPolygon([cx - 20, cy - 30, cx, cy + 26, cx + 20, cy - 30]);
+          iconG.endFill();
+          iconG.beginFill(0x00f2fe, 1);
+          iconG.drawCircle(cx - 8, cy - 8, 4);
+          iconG.drawCircle(cx + 8, cy - 8, 4);
+          iconG.endFill();
+          break;
+
+        case 'CAT':
+          // Bastet Cat
+          iconG.beginFill(0xff9d3c, 1);
+          iconG.drawPolygon([cx - 18, cy - 28, cx + 18, cy - 28, cx + 14, cy + 22, cx - 14, cy + 22]);
+          iconG.endFill();
+          break;
+
+        case 'ANKH':
+          // Ankh Cross
+          iconG.lineStyle(6, 0x1f7a4d, 1);
+          iconG.drawCircle(cx, cy - 14, 12);
+          iconG.moveTo(cx, cy - 2); iconG.lineTo(cx, cy + 26);
+          iconG.moveTo(cx - 16, cy + 8); iconG.lineTo(cx + 16, cy + 8);
+          break;
+
+        case 'CHEST':
+          // Treasure Chest
+          iconG.beginFill(0xd8a040, 1);
+          iconG.drawRoundedRect(cx - 24, cy - 16, 48, 36, 6);
+          iconG.endFill();
+          iconG.beginFill(0xffd873, 1);
+          iconG.drawRect(cx - 4, cy - 4, 8, 12);
+          iconG.endFill();
+          break;
+
+        case 'WILD':
+          // Solar Disc Wild
+          iconG.beginFill(0xffcf3c, 1);
+          iconG.drawCircle(cx, cy, 26);
+          iconG.endFill();
+          iconG.lineStyle(3, 0xffffff, 1);
+          iconG.drawCircle(cx, cy, 32);
+          break;
+
+        case 'SCATTER':
+          // Golden Pyramid Scatter
+          iconG.beginFill(0xff733c, 1);
+          iconG.drawPolygon([cx, cy - 28, cx + 30, cy + 24, cx - 30, cy + 24]);
+          iconG.endFill();
+          break;
+
+        default:
+          // Royal Letters A, K, Q, J
+          const txt = new PIXI.Text(sym.glyph, {
+            fontFamily: 'Georgia, serif',
+            fontSize: 58,
+            fontWeight: '900',
+            fill: 0xffe9a8,
+            align: 'center',
+            stroke: 0x3a1a00,
+            strokeThickness: 5,
+            dropShadow: true,
+            dropShadowColor: 0x000000,
+            dropShadowBlur: 6
+          });
+          txt.anchor.set(0.5);
+          txt.x = cx;
+          txt.y = cy;
+          iconG.addChild(txt);
+          break;
+      }
+
+      g.addChild(iconG);
 
       const rt = PIXI.RenderTexture.create({ width: size, height: size, resolution: 2 });
       this.app.renderer.render(g, { renderTexture: rt });
@@ -113,9 +213,9 @@ class PixiRenderer {
       // Glow / Win Highlight Texture
       const glowContainer = new PIXI.Container();
       const glowBg = new PIXI.Graphics();
-      glowBg.beginFill(0xffd873, 0.35);
+      glowBg.beginFill(0xffd873, 0.4);
       glowBg.lineStyle(6, 0xffffff, 1);
-      glowBg.drawRoundedRect(2, 2, size - 4, size - 4, 22);
+      glowBg.drawRoundedRect(2, 2, size - 4, size - 4, 20);
       glowBg.endFill();
       glowContainer.addChild(glowBg);
       glowContainer.addChild(g);

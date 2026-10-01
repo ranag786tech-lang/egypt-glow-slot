@@ -30,7 +30,7 @@ class BonusEngine {
     for (let i = 0; i < 6; i++) {
       const card = document.createElement('div');
       card.className = 'pick-card';
-      card.innerHTML = '𓆣';
+      card.innerHTML = '🪲';
       card.addEventListener('click', () => {
         if (card.classList.contains('revealed') || picksRemaining <= 0) return;
 
@@ -50,7 +50,12 @@ class BonusEngine {
         if (picksRemaining <= 0) {
           setTimeout(() => {
             modal.classList.remove('show');
-            this.slotEngine.balance += totalWon;
+            if (window.walletEngine) {
+              window.walletEngine.add(totalWon, 'USD', 'Pick Bonus Win');
+              this.slotEngine.balance = window.walletEngine.getBalance();
+            } else {
+              this.slotEngine.balance += totalWon;
+            }
             this.slotEngine.roundWin += totalWon;
             if (onComplete) onComplete(totalWon);
           }, 1500);
